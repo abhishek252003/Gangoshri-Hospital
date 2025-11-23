@@ -1,0 +1,7 @@
+.git/
+*.log
+.env
+README.md
+__pycache__/
+*.pyc
+.pytest_cache/

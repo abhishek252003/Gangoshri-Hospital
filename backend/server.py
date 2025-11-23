@@ -862,9 +862,8 @@ async def update_user_status(user_id: str, status_update: dict, current_user: di
 app.include_router(api_router)
 
 # Serve frontend static files only if the directory exists
-import os
 frontend_build_path = "../frontend/build"
-if os.path.exists(frontend_build_path):
+if os.path.exists(frontend_build_path) and os.path.isdir(frontend_build_path):
     app.mount("/", StaticFiles(directory=frontend_build_path, html=True), name="frontend")
 else:
     # Fallback route for when frontend is served separately
@@ -884,8 +883,10 @@ async def not_found_handler(request, exc):
     
     # Try to serve frontend index.html if it exists
     try:
-        if os.path.exists(frontend_build_path):
-            return FileResponse(f"{frontend_build_path}/index.html")
+        if os.path.exists(frontend_build_path) and os.path.isdir(frontend_build_path):
+            index_path = os.path.join(frontend_build_path, "index.html")
+            if os.path.exists(index_path):
+                return FileResponse(index_path)
     except FileNotFoundError:
         pass
     
