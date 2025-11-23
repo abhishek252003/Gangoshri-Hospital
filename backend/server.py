@@ -861,8 +861,16 @@ async def update_user_status(user_id: str, status_update: dict, current_user: di
 # Include the router in the main app
 app.include_router(api_router)
 
-# Serve frontend static files
-app.mount("/", StaticFiles(directory="../frontend/build", html=True), name="frontend")
+# Serve frontend static files only if the directory exists
+import os
+frontend_build_path = "../frontend/build"
+if os.path.exists(frontend_build_path):
+    app.mount("/", StaticFiles(directory=frontend_build_path, html=True), name="frontend")
+else:
+    # Fallback route for when frontend is served separately
+    @app.get("/")
+    async def frontend_fallback():
+        return {"message": "Frontend is served separately. Please check your frontend deployment."}
 
 # Fallback to serve index.html for any unmatched routes (SPA routing)
 @app.exception_handler(404)
@@ -874,14 +882,18 @@ async def not_found_handler(request, exc):
             content={"detail": "Not found"}
         )
     
-    # For all other routes, serve the frontend index.html
+    # Try to serve frontend index.html if it exists
     try:
-        return FileResponse("../frontend/build/index.html")
+        if os.path.exists(frontend_build_path):
+            return FileResponse(f"{frontend_build_path}/index.html")
     except FileNotFoundError:
-        return JSONResponse(
-            status_code=404,
-            content={"detail": "Frontend build not found"}
-        )
+        pass
+    
+    # Fallback response
+    return JSONResponse(
+        status_code=404,
+        content={"detail": "Resource not found"}
+    )
 
 app.add_middleware(
     CORSMiddleware,
