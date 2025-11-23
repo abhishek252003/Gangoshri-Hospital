@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
@@ -51,42 +52,45 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route
+            path="/"
+            element={!user ? <LandingPage onLogin={handleLogin} /> : <Navigate to="/dashboard" />}
+          />
+          <Route
             path="/login"
             element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/dashboard" />}
           />
           <Route
             path="/dashboard"
-            element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
           />
           <Route
             path="/patients"
-            element={user ? <Patients user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            element={user ? <Patients user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
           />
           <Route
             path="/patients/:patientId"
-            element={user ? <PatientProfile user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            element={user ? <PatientProfile user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
           />
           <Route
             path="/appointments"
-            element={user ? <Appointments user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            element={user ? <Appointments user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
           />
           <Route
             path="/consultation"
-            element={user ? <Consultation user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            element={user ? <Consultation user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
           />
           <Route
             path="/prescriptions"
-            element={user ? <Prescriptions user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            element={user ? <Prescriptions user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
           />
           <Route
             path="/billing"
-            element={user ? <Billing user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            element={user ? <Billing user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
           />
           <Route
             path="/user-management"
-            element={user && user.role === "ADMIN" ? <UserManagement token={localStorage.getItem("token")} user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            element={user && user.role === "ADMIN" ? <UserManagement token={localStorage.getItem("token")} user={user} onLogout={handleLogout} /> : <Navigate to="/" />}
           />
-          <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
         </Routes>
       </BrowserRouter>
     </div>
