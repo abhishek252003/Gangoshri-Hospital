@@ -1,5 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -858,6 +860,28 @@ async def update_user_status(user_id: str, status_update: dict, current_user: di
 
 # Include the router in the main app
 app.include_router(api_router)
+
+# Serve frontend static files
+app.mount("/", StaticFiles(directory="../frontend/build", html=True), name="frontend")
+
+# Fallback to serve index.html for any unmatched routes (SPA routing)
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    # For API routes, return JSON error
+    if request.url.path.startswith("/api"):
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Not found"}
+        )
+    
+    # For all other routes, serve the frontend index.html
+    try:
+        return FileResponse("../frontend/build/index.html")
+    except FileNotFoundError:
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Frontend build not found"}
+        )
 
 app.add_middleware(
     CORSMiddleware,
