@@ -32,7 +32,20 @@ export default function Login({ onLogin }) {
       toast.success("Login successful!");
       onLogin(response.data.access_token, response.data.user);
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Login failed");
+      // Format error message properly
+      let errorMessage = "Login failed";
+      if (error.response?.data?.detail) {
+        if (typeof error.response.data.detail === 'string') {
+          errorMessage = error.response.data.detail;
+        } else if (Array.isArray(error.response.data.detail)) {
+          // Handle validation errors array
+          errorMessage = error.response.data.detail.map(err => err.msg || JSON.stringify(err)).join(', ');
+        } else if (typeof error.response.data.detail === 'object') {
+          // Handle single validation error object
+          errorMessage = error.response.data.detail.msg || JSON.stringify(error.response.data.detail);
+        }
+      }
+      toast.error(errorMessage);
     }
     setLoading(false);
   };
@@ -53,7 +66,20 @@ export default function Login({ onLogin }) {
         specialization: ""
       });
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Registration failed");
+      // Format error message properly
+      let errorMessage = "Registration failed";
+      if (error.response?.data?.detail) {
+        if (typeof error.response.data.detail === 'string') {
+          errorMessage = error.response.data.detail;
+        } else if (Array.isArray(error.response.data.detail)) {
+          // Handle validation errors array
+          errorMessage = error.response.data.detail.map(err => err.msg || JSON.stringify(err)).join(', ');
+        } else if (typeof error.response.data.detail === 'object') {
+          // Handle single validation error object
+          errorMessage = error.response.data.detail.msg || JSON.stringify(error.response.data.detail);
+        }
+      }
+      toast.error(errorMessage);
     }
     setLoading(false);
   };
