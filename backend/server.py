@@ -304,7 +304,11 @@ async def log_audit(user_id: str, user_email: str, action: str, resource_type: s
 # ==================== AUTH ROUTES ====================
 
 @api_router.post("/auth/register", response_model=User)
-async def register_user(input: UserCreate):
+async def register_user(input: UserCreate, current_user: dict = Depends(get_current_user)):
+    # Only ADMIN users can register new users
+    if current_user["role"] != "ADMIN":
+        raise HTTPException(status_code=403, detail="Only administrators can register new users")
+    
     # Check if user exists
     existing = await db.users.find_one({"email": input.email}, {"_id": 0})
     if existing:
@@ -831,6 +835,26 @@ async def get_doctors(current_user: dict = Depends(get_current_user)):
         if isinstance(d['created_at'], str):
             d['created_at'] = datetime.fromisoformat(d['created_at'])
     return doctors
+
+@api_router.patch("/users/{user_id}/status")
+async def update_user_status(user_id: str, status_update: dict, current_user: dict = Depends(get_current_user)):
+    # Only ADMIN users can update user status
+    if current_user["role"] != "ADMIN":
+        raise HTTPException(status_code=403, detail="Only administrators can update user status")
+    
+    # Prevent users from deactivating themselves
+    if current_user["id"] == user_id and not status_update.get("is_active", True):
+        raise HTTPException(status_code=400, detail="You cannot deactivate your own account")
+    
+    # Update user status
+    update_data = {"is_active": status_update.get("is_active", True)}
+    result = await db.users.update_one({"id": user_id}, {"$set": update_data})
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    await log_audit(current_user["id"], current_user["email"], "UPDATE_STATUS", "user", user_id, update_data)
+    return {"message": "User status updated successfully"}
 
 # Include the router in the main app
 app.include_router(api_router)

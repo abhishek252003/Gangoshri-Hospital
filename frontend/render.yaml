@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: gangosri-his-frontend
+    env: static
+    buildCommand: npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        value: https://gangoshri-hospital.onrender.com
+    headers:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"

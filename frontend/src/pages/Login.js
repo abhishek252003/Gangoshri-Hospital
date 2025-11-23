@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -13,15 +12,6 @@ const API = `${BACKEND_URL}/api`;
 
 export default function Login({ onLogin }) {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [registerData, setRegisterData] = useState({
-    email: "",
-    password: "",
-    full_name: "",
-    role: "RECEPTIONIST",
-    phone: "",
-    employee_id: "",
-    specialization: ""
-  });
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
@@ -34,40 +24,6 @@ export default function Login({ onLogin }) {
     } catch (error) {
       // Format error message properly
       let errorMessage = "Login failed";
-      if (error.response?.data?.detail) {
-        if (typeof error.response.data.detail === 'string') {
-          errorMessage = error.response.data.detail;
-        } else if (Array.isArray(error.response.data.detail)) {
-          // Handle validation errors array
-          errorMessage = error.response.data.detail.map(err => err.msg || JSON.stringify(err)).join(', ');
-        } else if (typeof error.response.data.detail === 'object') {
-          // Handle single validation error object
-          errorMessage = error.response.data.detail.msg || JSON.stringify(error.response.data.detail);
-        }
-      }
-      toast.error(errorMessage);
-    }
-    setLoading(false);
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await axios.post(`${API}/auth/register`, registerData);
-      toast.success("Registration successful! Please login.");
-      setRegisterData({
-        email: "",
-        password: "",
-        full_name: "",
-        role: "RECEPTIONIST",
-        phone: "",
-        employee_id: "",
-        specialization: ""
-      });
-    } catch (error) {
-      // Format error message properly
-      let errorMessage = "Registration failed";
       if (error.response?.data?.detail) {
         if (typeof error.response.data.detail === 'string') {
           errorMessage = error.response.data.detail;
@@ -104,135 +60,44 @@ export default function Login({ onLogin }) {
           <CardDescription className="text-base">Hospital Information System</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login" data-testid="login-tab">Login</TabsTrigger>
-              <TabsTrigger value="register" data-testid="register-tab">Register</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="doctor@gangosri.com"
-                    value={loginData.email}
-                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                    required
-                    data-testid="login-email-input"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={loginData.password}
-                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                    required
-                    data-testid="login-password-input"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all duration-200"
-                  disabled={loading}
-                  data-testid="login-submit-button"
-                >
-                  {loading ? "Logging in..." : "Login"}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="register">
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="reg-name">Full Name</Label>
-                  <Input
-                    id="reg-name"
-                    placeholder="Dr. John Doe"
-                    value={registerData.full_name}
-                    onChange={(e) => setRegisterData({ ...registerData, full_name: e.target.value })}
-                    required
-                    data-testid="register-name-input"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-email">Email</Label>
-                  <Input
-                    id="reg-email"
-                    type="email"
-                    placeholder="doctor@gangosri.com"
-                    value={registerData.email}
-                    onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                    required
-                    data-testid="register-email-input"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-password">Password</Label>
-                  <Input
-                    id="reg-password"
-                    type="password"
-                    placeholder="Create a password"
-                    value={registerData.password}
-                    onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                    required
-                    data-testid="register-password-input"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-role">Role</Label>
-                  <Select value={registerData.role} onValueChange={(value) => setRegisterData({ ...registerData, role: value })}>
-                    <SelectTrigger data-testid="register-role-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ADMIN">Admin</SelectItem>
-                      <SelectItem value="DOCTOR">Doctor</SelectItem>
-                      <SelectItem value="NURSE">Nurse</SelectItem>
-                      <SelectItem value="RECEPTIONIST">Receptionist</SelectItem>
-                      <SelectItem value="LAB_TECHNICIAN">Lab Technician</SelectItem>
-                      <SelectItem value="ACCOUNTANT">Accountant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-phone">Phone</Label>
-                  <Input
-                    id="reg-phone"
-                    placeholder="+91 9876543210"
-                    value={registerData.phone}
-                    onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
-                    data-testid="register-phone-input"
-                  />
-                </div>
-                {registerData.role === "DOCTOR" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="reg-spec">Specialization</Label>
-                    <Input
-                      id="reg-spec"
-                      placeholder="Cardiologist"
-                      value={registerData.specialization}
-                      onChange={(e) => setRegisterData({ ...registerData, specialization: e.target.value })}
-                      data-testid="register-specialization-input"
-                    />
-                  </div>
-                )}
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all duration-200"
-                  disabled={loading}
-                  data-testid="register-submit-button"
-                >
-                  {loading ? "Registering..." : "Register"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <div className="text-center mb-6 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+            <p className="text-sm">New user registration is restricted. Please contact your administrator to create an account.</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="doctor@gangosri.com"
+                value={loginData.email}
+                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                required
+                data-testid="login-email-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={loginData.password}
+                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                required
+                data-testid="login-password-input"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all duration-200"
+              disabled={loading}
+              data-testid="login-submit-button"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>

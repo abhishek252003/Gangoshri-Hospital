@@ -9,6 +9,7 @@ import Appointments from "./pages/Appointments";
 import Consultation from "./pages/Consultation";
 import Prescriptions from "./pages/Prescriptions";
 import Billing from "./pages/Billing";
+import UserManagement from "./pages/UserManagement";
 import { Toaster } from "./components/ui/sonner";
 
 function App() {
@@ -80,6 +81,10 @@ function App() {
           <Route
             path="/billing"
             element={user ? <Billing user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/user-management"
+            element={user && user.role === "ADMIN" ? <UserManagement token={localStorage.getItem("token")} user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
           />
           <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
         </Routes>
